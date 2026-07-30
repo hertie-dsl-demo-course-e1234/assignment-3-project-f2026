@@ -1,0 +1,15 @@
+# Group project - one repo per team, one score per team.
+# `type: group` makes the collector iterate over teams (from classroom-config/teams.csv)
+# rather than over students, and write the score into the `team_grade` column of
+# grades/assignment-3-project.csv. Each member's private `adjustment` and the shared
+# `team_comments` are filled by hand afterwards.
+#
+# The hidden tests are STRUCTURAL only - required files, headings, placeholders replaced,
+# a `run_pipeline` entry point, pinned dependencies, a fixed seed. They are a completeness
+# floor worth 7 of the 25 marks; the remaining 18 are hand-marked against the rubric in the
+# brief.
+type: group
+format: py
+autograde: true
+max_auto: 7
+tests: tests
