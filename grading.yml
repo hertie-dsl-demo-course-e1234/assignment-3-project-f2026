@@ -1,17 +1,13 @@
 # Group project - one repo per team, one result per team.
 # `type: group` makes the collector iterate over teams (from classroom-config/teams.csv)
-# rather than over students. Each member's private `individual_adjustment` and the shared
-# `team_comments` are filled by hand afterwards.
+# rather than over students. It records how many hidden tests the team's submission passed
+# in `autograde_score` - the same column an individual assignment uses, on every member's
+# row. `team_score` is yours: the shared mark you set for the team. Each member's private
+# `individual_adjustment` and the shared `team_comments` are filled by hand afterwards.
 #
 # The hidden tests are STRUCTURAL only - required files, headings, placeholders replaced,
 # a `run_pipeline` entry point, pinned dependencies, a fixed seed. They are a completeness
 # floor; the 25 marks are hand-marked against the rubric in the brief.
-#
-# NB `team_score` is the column the autograder writes its passing-test COUNT into, and it
-# is also where you put the team's shared MARK. It is write-once, so whichever lands first
-# stands: fill it by hand before the grading deadline and the autograder leaves it alone
-# (check autograde/assignment-3-project/*.json for the per-test detail either way). Set
-# `autograde: false` if you would rather the count never competed for that cell.
 type: group
 autograde: true
 tests: tests
