@@ -2,7 +2,7 @@
 
 **Weight:** 25% of the final mark
 **Teams:** 2-3 students (see `teams.csv`; one repository per team)
-**Released:** 20 October 2026 | **Clinic:** 17 November | **Due:** Friday 27 November, 23:59
+**Released:** 15 September 2026 | **Clinic:** 13 October | **Due:** Friday 23 October, 23:59
 **Submission:** push to `main` in this team repository. The last commit before the deadline
 (plus a silent 72-hour grace window) is what we mark.
 
