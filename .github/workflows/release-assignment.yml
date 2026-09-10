@@ -9,16 +9,8 @@ name: Release assignment
 on:
   workflow_dispatch:
     inputs:
-      cohort_org:
-        description: "Target cohort org"
-        required: true
-        type: choice
-        default: "hertie-dsl-demo-f2026"
-        options:
-          - hertie-dsl-demo-f2025
-          - hertie-dsl-demo-f2026
       course_source_repo:
-        description: "Course-org repo to hand out from"
+        description: "1. Course-org repo to hand out from"
         required: true
         type: choice
         default: "assignment-3-project-f2026"
@@ -26,25 +18,20 @@ on:
           - assignment-1-f2026
           - assignment-2-f2026
           - assignment-3-project-f2026
-      include_solution:
-        description: "Also push the solution (from the template's solution branch) into each student repo"
-        type: boolean
-        default: false
-      type:
-        description: "individual (one repo per student) or group (one per team from teams.csv). auto = whatever the template's grading_config.yml declares (default: individual)"
+      cohort_org:
+        description: "2. Target cohort org"
         required: true
         type: choice
-        default: auto
+        default: "hertie-dsl-demo-f2026"
         options:
-          - auto
-          - individual
-          - group
-      slug:
-        description: "Only if TWO schedule.yml assignments hand out from this template: which one (the schedule key). Leave empty otherwise"
-        required: false
-        default: ""
+          - hertie-dsl-demo-f2025
+          - hertie-dsl-demo-f2026
+      include_solution:
+        description: "3. Also push the model solution from the template's solution branch into every student repo"
+        type: boolean
+        default: false
       dry_run:
-        description: "Preview only - list the repos that WOULD be created, don't create them"
+        description: "4. Preview only - list the repos that would be created, create nothing"
         type: boolean
         default: false
 
@@ -100,14 +87,10 @@ jobs:
           COHORT_ORG: ${{ inputs.cohort_org }}
           COURSE_SOURCE_REPO: ${{ inputs.course_source_repo }}
           INC_SOL: ${{ inputs.include_solution }}
-          TYPE: ${{ inputs.type }}
-          SLUG: ${{ inputs.slug }}
           DRY_RUN: ${{ inputs.dry_run }}
         run: |
           gh auth setup-git
           args=(--master-org "$MASTER_ORG" --course-source-repo "$COURSE_SOURCE_REPO" --cohort-org "$COHORT_ORG")
           [ "$INC_SOL" = "true" ] && args+=(--solution)
-          args+=(--type "$TYPE")
-          [ -n "$SLUG" ] && args+=(--slug "$SLUG")
           [ "$DRY_RUN" = "true" ] && args+=(--dry-run)
           python3 -m dsl_course.assign "${args[@]}"
