@@ -19,6 +19,7 @@ on:
           - assignment-2-f2026
           - assignment-3-project-f2026
           - assignment-90-e2ee096fb-private
+          - assignment-90-e2ee096fb-public
       cohort_org:
         description: "2. Target cohort org"
         required: true
