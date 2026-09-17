@@ -18,6 +18,7 @@ on:
           - assignment-1-f2026
           - assignment-2-f2026
           - assignment-3-project-f2026
+          - assignment-90-e2e4288f2-external
           - assignment-90-e2e4288f2-public
           - assignment-90-e2e4288f2-student-choice
       cohort_org:
