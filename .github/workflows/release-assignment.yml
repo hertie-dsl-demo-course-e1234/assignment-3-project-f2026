@@ -25,6 +25,7 @@ on:
           - assignment-90-e2e0745f1-external
           - assignment-90-e2e0745f1-private
           - assignment-90-e2e0745f1-public
+          - assignment-90-e2e0745f1-shared
           - assignment-90-e2e0745f1-student-choice
       cohort_org:
         description: "2. Target cohort org"
