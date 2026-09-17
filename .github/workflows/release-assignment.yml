@@ -20,6 +20,7 @@ on:
           - assignment-3-project-f2026
           - assignment-4-f2026
           - assignment-5-f2026
+          - assignment-6-f2026
       cohort_org:
         description: "2. Target cohort org"
         required: true
