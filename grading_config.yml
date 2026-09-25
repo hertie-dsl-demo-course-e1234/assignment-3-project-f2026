@@ -1,4 +1,4 @@
-# INSTRUCTOR-OWNED - defines the assignment. Dates live in the cohort's schedule.yml.
+# INSTRUCTOR-OWNED - defines the assignment. Dates live in the semester's schedule.yml.
 title: Group project          # the assignment's name, shown to graders and on the site
 type: group                   # individual | group
 submit_via: assignment_repo   # assignment_repo (they push to their repo) | external (handed in elsewhere: Moodle, Kaggle, in class - no repo is created) | shared_dropbox_repo (one private repo for the whole cohort, each student pushes into their own folder, peers can read it)
