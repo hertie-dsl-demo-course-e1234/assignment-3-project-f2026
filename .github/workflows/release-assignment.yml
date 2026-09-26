@@ -23,6 +23,7 @@ on:
           - assignment-6-f2026
           - assignment-7-f2026
           - assignment-90-e2e931eef-private
+          - assignment-90-e2e931eef-public
       semester_org:
         description: "2. Target semester org"
         required: true
