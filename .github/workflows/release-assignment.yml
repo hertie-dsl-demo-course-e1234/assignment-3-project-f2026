@@ -22,11 +22,6 @@ on:
           - assignment-5-f2026
           - assignment-6-f2026
           - assignment-7-f2026
-          - assignment-90-e2e931eef-external
-          - assignment-90-e2e931eef-private
-          - assignment-90-e2e931eef-public
-          - assignment-90-e2e931eef-shared
-          - assignment-90-e2e931eef-student-choice
       semester_org:
         description: "2. Target semester org"
         required: true
