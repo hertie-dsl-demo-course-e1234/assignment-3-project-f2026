@@ -26,45 +26,58 @@ REGIONS = [f"R{i:02d}" for i in range(1, 13)]
 
 
 def _z(values: np.ndarray) -> np.ndarray:
+    ### BEGIN SOLUTION
     return (values - np.nanmean(values)) / np.nanstd(values)
+    ### END SOLUTION
 
 
 def load_data() -> pd.DataFrame:
     """Return the full frame, including the `missed_target` column and `region` group key."""
+    ### BEGIN SOLUTION
     rng = np.random.default_rng(SEED)
 
     region = rng.choice(REGIONS, N)
     region_effect = dict(zip(REGIONS, rng.normal(0, 0.6, len(REGIONS))))
 
-    pop_density = rng.lognormal(6.2, 0.7, N).round(1)          # people per km2
-    deprivation = rng.normal(50, 12, N).round(1)               # index, higher = worse
+    pop_density = rng.lognormal(6.2, 0.7, N).round(1)  # people per km2
+    deprivation = rng.normal(50, 12, N).round(1)  # index, higher = worse
     collection_points = rng.poisson(14, N).astype(float)
     # Last year's recycling rate: correlated with the drivers, but measured noisily -
     # which is exactly why ranking on it (the authority's current practice) is a weak
     # baseline rather than a hopeless one.
     current_rate = np.clip(
         58 - 0.10 * (deprivation - 50) + 0.20 * collection_points + rng.normal(0, 9, N),
-        20, 85).round(1)
+        20,
+        85,
+    ).round(1)
     kerbside_weeks = rng.choice([1, 2, 4], N, p=[0.45, 0.4, 0.15]).astype(float)
-    collection_type = rng.choice(["kerbside", "mixed", "bring_bank"], N,
-                                 p=[0.55, 0.3, 0.15])
+    collection_type = rng.choice(
+        ["kerbside", "mixed", "bring_bank"], N, p=[0.55, 0.3, 0.15]
+    )
 
-    eta = (1.2 * _z(deprivation) - 1.0 * _z(collection_points)
-           - 0.5 * _z(current_rate) + 0.4 * _z(pop_density)
-           + np.array([region_effect[r] for r in region])
-           + rng.normal(0, 0.8, N) - 1.1)
+    eta = (
+        1.2 * _z(deprivation)
+        - 1.0 * _z(collection_points)
+        - 0.5 * _z(current_rate)
+        + 0.4 * _z(pop_density)
+        + np.array([region_effect[r] for r in region])
+        + rng.normal(0, 0.8, N)
+        - 1.1
+    )
     missed = rng.random(N) < 1 / (1 + np.exp(-eta))
 
-    frame = pd.DataFrame({
-        "region": region,
-        "collection_type": collection_type,
-        "pop_density": pop_density,
-        "deprivation_index": deprivation,
-        "collection_points": collection_points,
-        "current_rate": current_rate,
-        "kerbside_weeks": kerbside_weeks,
-        "missed_target": missed.astype(int),
-    })
+    frame = pd.DataFrame(
+        {
+            "region": region,
+            "collection_type": collection_type,
+            "pop_density": pop_density,
+            "deprivation_index": deprivation,
+            "collection_points": collection_points,
+            "current_rate": current_rate,
+            "kerbside_weeks": kerbside_weeks,
+            "missed_target": missed.astype(int),
+        }
+    )
 
     # Informative missingness: non-reporting is commoner among councils that miss.
     p_missing_points = np.where(frame.missed_target == 1, 0.11, 0.05)
@@ -72,11 +85,14 @@ def load_data() -> pd.DataFrame:
     frame.loc[rng.random(N) < 0.04, "deprivation_index"] = np.nan
 
     return frame
+    ### END SOLUTION
 
 
 def region_size_tercile(frame: pd.DataFrame) -> pd.Series:
     """Small / medium / large by population density - the subgroup the report disaggregates."""
+    ### BEGIN SOLUTION
     return pd.qcut(frame.pop_density, 3, labels=["small", "medium", "large"])
+    ### END SOLUTION
 
 
 if __name__ == "__main__":

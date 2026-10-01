@@ -25,37 +25,62 @@ from .data import load_data, region_size_tercile
 SEED = 2026
 N_VISITS = 20  # the authority funds twenty advisory visits a year - hence precision@20
 
-NUM_COLS = ["pop_density", "deprivation_index", "collection_points",
-            "current_rate", "kerbside_weeks"]
+NUM_COLS = [
+    "pop_density",
+    "deprivation_index",
+    "collection_points",
+    "current_rate",
+    "kerbside_weeks",
+]
 CAT_COLS = ["collection_type"]
 
 
 def build_preprocessor() -> ColumnTransformer:
     """Every fitted transformation lives in here, so cross-validation cannot leak."""
-    return ColumnTransformer([
-        ("num", Pipeline([
-            # add_indicator keeps "this was not reported", which is informative here
-            ("imp", SimpleImputer(strategy="median", add_indicator=True)),
-            ("sc", StandardScaler()),
-        ]), NUM_COLS),
-        ("cat", OneHotEncoder(handle_unknown="ignore"), CAT_COLS),
-    ])
+    ### BEGIN SOLUTION
+    return ColumnTransformer(
+        [
+            (
+                "num",
+                Pipeline(
+                    [
+                        # add_indicator keeps "this was not reported", which is informative here
+                        ("imp", SimpleImputer(strategy="median", add_indicator=True)),
+                        ("sc", StandardScaler()),
+                    ]
+                ),
+                NUM_COLS,
+            ),
+            ("cat", OneHotEncoder(handle_unknown="ignore"), CAT_COLS),
+        ]
+    )
+    ### END SOLUTION
 
 
 def build_models() -> dict[str, tuple[Pipeline, dict]]:
     """The interpretable candidate and the flexible one, with their tuning grids."""
+    ### BEGIN SOLUTION
     return {
         "logistic": (
-            Pipeline([("pre", build_preprocessor()),
-                      ("clf", LogisticRegression(max_iter=2000))]),
+            Pipeline(
+                [
+                    ("pre", build_preprocessor()),
+                    ("clf", LogisticRegression(max_iter=2000)),
+                ]
+            ),
             {"clf__C": np.logspace(-2, 2, 9)},
         ),
         "boosting": (
-            Pipeline([("pre", build_preprocessor()),
-                      ("clf", HistGradientBoostingClassifier(random_state=SEED))]),
+            Pipeline(
+                [
+                    ("pre", build_preprocessor()),
+                    ("clf", HistGradientBoostingClassifier(random_state=SEED)),
+                ]
+            ),
             {"clf__learning_rate": [0.03, 0.1, 0.3]},
         ),
     }
+    ### END SOLUTION
 
 
 def split(frame: pd.DataFrame):
@@ -64,23 +89,29 @@ def split(frame: pd.DataFrame):
     Regional policy is a shared cause, so splitting municipalities at random would let the
     model memorise region effects and report a score it could not repeat on a new region.
     """
+    ### BEGIN SOLUTION
     rng = np.random.default_rng(SEED)
     regions = np.sort(frame.region.unique())
-    test_regions = set(rng.choice(regions, size=max(1, round(0.3 * len(regions))),
-                                  replace=False))
+    test_regions = set(
+        rng.choice(regions, size=max(1, round(0.3 * len(regions))), replace=False)
+    )
     is_test = frame.region.isin(test_regions)
     return frame.loc[~is_test].copy(), frame.loc[is_test].copy(), sorted(test_regions)
+    ### END SOLUTION
 
 
 def precision_at_k(y_true: np.ndarray, scores: np.ndarray, k: int) -> float:
     """Of the k highest-scored municipalities, the share that did miss the target."""
+    ### BEGIN SOLUTION
     k = min(k, len(scores))
     top = np.argsort(scores)[::-1][:k]
     return float(np.mean(y_true[top]))
+    ### END SOLUTION
 
 
 def bootstrap_ci(y_true, scores, metric, n_boot=2000, level=0.95, seed=SEED):
     """Percentile bootstrap over the test rows - a point estimate is not an estimate."""
+    ### BEGIN SOLUTION
     rng = np.random.default_rng(seed)
     values = []
     for _ in range(n_boot):
@@ -89,19 +120,30 @@ def bootstrap_ci(y_true, scores, metric, n_boot=2000, level=0.95, seed=SEED):
             continue
         values.append(metric(y_true[idx], scores[idx]))
     values = np.sort(values)
-    return (float(values[int((1 - level) / 2 * len(values))]),
-            float(values[int((1 + level) / 2 * len(values)) - 1]))
+    return (
+        float(values[int((1 - level) / 2 * len(values))]),
+        float(values[int((1 + level) / 2 * len(values)) - 1]),
+    )
+    ### END SOLUTION
 
 
 def evaluate(name, y_true, scores, k=N_VISITS):
+    ### BEGIN SOLUTION
     auc = roc_auc_score(y_true, scores)
     lo, hi = bootstrap_ci(y_true, scores, roc_auc_score)
-    return {"model": name, "auc": auc, "ci_low": lo, "ci_high": hi,
-            "precision_at_k": precision_at_k(y_true, scores, k)}
+    return {
+        "model": name,
+        "auc": auc,
+        "ci_low": lo,
+        "ci_high": hi,
+        "precision_at_k": precision_at_k(y_true, scores, k),
+    }
+    ### END SOLUTION
 
 
 def run_pipeline() -> dict:
     """Load, split, tune, score once, and return every number the report quotes."""
+    ### BEGIN SOLUTION
     frame = load_data()
     train, test, test_regions = split(frame)
     y_tr = train.pop("missed_target").to_numpy()
@@ -109,8 +151,10 @@ def run_pipeline() -> dict:
     groups = train.region.to_numpy()
 
     print(f"n = {len(frame)}, base rate = {(y_tr.sum() + y_te.sum()) / len(frame):.3f}")
-    print(f"train {len(y_tr)} rows / {train.region.nunique()} regions, "
-          f"test {len(y_te)} rows / {len(test_regions)} regions {test_regions}")
+    print(
+        f"train {len(y_tr)} rows / {train.region.nunique()} regions, "
+        f"test {len(y_te)} rows / {len(test_regions)} regions {test_regions}"
+    )
 
     results = []
 
@@ -123,7 +167,9 @@ def run_pipeline() -> dict:
     fitted = {}
     for name, (pipe, grid) in build_models().items():
         search = GridSearchCV(pipe, grid, scoring="roc_auc", cv=cv, n_jobs=1)
-        search.fit(train, y_tr, groups=groups)   # groups: tuning respects the regions too
+        search.fit(
+            train, y_tr, groups=groups
+        )  # groups: tuning respects the regions too
         scores = search.predict_proba(test)[:, 1]
         fitted[name] = (search, scores)
         row = evaluate(name, y_te, scores)
@@ -134,12 +180,16 @@ def run_pipeline() -> dict:
     print(f"\n{'model':<32} {'test AUC':>9} {'95% CI':>18} {'prec@20':>9}")
     for row in results:
         ci = f"[{row['ci_low']:.2f}, {row['ci_high']:.2f}]"
-        print(f"{row['model']:<32} {row['auc']:>9.3f} {ci:>18} {row['precision_at_k']:>9.2f}")
+        print(
+            f"{row['model']:<32} {row['auc']:>9.3f} {ci:>18} {row['precision_at_k']:>9.2f}"
+        )
 
     # Subgroup: the aggregate is an average over municipalities, so disaggregate.
     chosen, chosen_scores = fitted["logistic"]
     tercile = region_size_tercile(frame).loc[test.index]
-    print(f"\nlogistic model by size tercile:\n{'group':<8} {'n':>4} {'AUC':>7}   95% CI")
+    print(
+        f"\nlogistic model by size tercile:\n{'group':<8} {'n':>4} {'AUC':>7}   95% CI"
+    )
     subgroups = {}
     for level in ("small", "medium", "large"):
         mask = (tercile == level).to_numpy()
@@ -150,10 +200,17 @@ def run_pipeline() -> dict:
         subgroups[level] = {"n": int(mask.sum()), "auc": auc, "ci": (lo, hi)}
         print(f"{level:<8} {mask.sum():>4} {auc:>7.3f}   [{lo:.3f}, {hi:.3f}]")
 
-    print(f"\nchosen model: logistic ({chosen.best_params_}); "
-          f"reported because its interval overlaps boosting's and it is interpretable.")
-    return {"results": results, "subgroups": subgroups,
-            "test_regions": test_regions, "seed": SEED}
+    print(
+        f"\nchosen model: logistic ({chosen.best_params_}); "
+        f"reported because its interval overlaps boosting's and it is interpretable."
+    )
+    return {
+        "results": results,
+        "subgroups": subgroups,
+        "test_regions": test_regions,
+        "seed": SEED,
+    }
+    ### END SOLUTION
 
 
 if __name__ == "__main__":
