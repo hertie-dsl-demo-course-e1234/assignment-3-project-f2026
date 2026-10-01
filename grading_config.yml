@@ -13,3 +13,4 @@ autograde: true               # true: run tests/ at the cutoff and show the coun
 completion_check: false       # true: execute the notebook at the cutoff, record whether it runs clean
 grader_pdf: false             # true: at the cutoff, archive each submission filtered to its marked questions as a PDF for graders
 tests: tests
+starter: handwritten
