@@ -26,9 +26,6 @@ on:
           - assignment-6-f2026
           - assignment-7-f2026
           - assignment-8-f2026
-          - assignment-test
-          - assignment-test-2
-          - assignment-test-3
       semester_org:
         description: "2. Target semester org"
         required: true
